@@ -107,8 +107,12 @@ class CBehavior extends CComponent implements IBehavior
 		$class=new ReflectionClass($this);
 		foreach($this->events() as $event=>$handler)
 		{
-			if($class->getMethod($handler)->isPublic())
+			if(! $class->getMethod($handler)->isPrivate())
+            {
 				$this->_owner->attachEventHandler($event,array($this,$handler));
+            } else {
+                throw new CException("Method " . $handler . " on " . get_class($this) . " is not public");
+            }
 		}
 	}
 }
