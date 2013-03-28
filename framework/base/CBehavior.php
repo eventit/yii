@@ -102,16 +102,25 @@ class CBehavior extends CComponent implements IBehavior
 		$this->_enabled=$value;
 	}
 
-	private function _attachEventHandlers()
+	protected function _attachEventHandlers()
 	{
 		$class=new ReflectionClass($this);
 		foreach($this->events() as $event=>$handler)
 		{
-			if(! $class->getMethod($handler)->isPrivate())
+			if($class->getMethod($handler)->isPublic())
             {
 				$this->_owner->attachEventHandler($event,array($this,$handler));
             } else {
-                throw new CException("Method " . $handler . " on " . get_class($this) . " is not public");
+                $className = $class->getMethod($handler)->getDeclaringClass()->name;
+
+                if (! in_array($className, array(
+                    "CModelBehavior",
+                    "CActiveRecordBehavior",
+                    "CConsoleCommandBehavior"
+                    )))
+                {                    
+                    throw new CException("Method " . $handler . " on " . $className . " is not public");
+                }
             }
 		}
 	}
